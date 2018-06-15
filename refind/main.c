@@ -710,6 +710,10 @@ LOADER_ENTRY *InitializeLoaderEntry(IN LOADER_ENTRY *Entry) {
 // Adds InitrdPath to Options, but only if Options doesn't already include an
 // initrd= line. Done to enable overriding the default initrd selection in a
 // refind_linux.conf file's options list.
+// If a '%s' substring is found in Options, it is replaced with the initrd path
+// WITHOUT 'initrd=' and without '.img' extension. Done to allow more complex
+// customization of initrd options. The '%s' substring therefore acts like a
+// variable.
 // Returns a pointer to a new string. The calling function is responsible for
 // freeing its memory.
 static CHAR16 *AddInitrdToOptions(CHAR16 *Options, CHAR16 *InitrdPath) {
@@ -717,10 +721,17 @@ static CHAR16 *AddInitrdToOptions(CHAR16 *Options, CHAR16 *InitrdPath) {
 
     if (Options != NULL)
         NewOptions = StrDuplicate(Options);
-    if ((InitrdPath != NULL) && !StriSubCmp(L"initrd=", Options)) {
+
+    if (InitrdPath != NULL) {
+        if(StriSubCmp(L"%s", Options)) {
+            CHAR16 *InitrdPathNoExt = StripImgExtension(InitrdPath);
+            ReplaceSubstring(&NewOptions, L"%s", InitrdPathNoExt);
+        } else if (!StriSubCmp(L"initrd=", Options)) {
         MergeStrings(&NewOptions, L"initrd=", L' ');
         MergeStrings(&NewOptions, InitrdPath, 0);
     }
+    }
+
     return NewOptions;
 } // CHAR16 *AddInitrdToOptions()
 

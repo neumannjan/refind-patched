@@ -1455,6 +1455,22 @@ CHAR16 * StripEfiExtension(IN CHAR16 *FileName) {
     return Copy;
 } // CHAR16 * StripExtension()
 
+// Remove the .img extension from FileName -- for instance, if FileName is
+// "fred.img", returns "fred". If the filename contains no .img extension,
+// returns a copy of the original input.
+CHAR16 * StripImgExtension(IN CHAR16 *FileName) {
+    UINTN  Length;
+    CHAR16 *Copy = NULL;
+
+    if ((FileName != NULL) && ((Copy = StrDuplicate(FileName)) != NULL)) {
+        Length = StrLen(Copy);
+        if ((Length >= 4) && MyStriCmp(&Copy[Length - 4], L".img")) {
+            Copy[Length - 4] = 0;
+        } // if
+    } // if
+    return Copy;
+} // CHAR16 * StripExtension()
+
 //
 // memory string search
 //
